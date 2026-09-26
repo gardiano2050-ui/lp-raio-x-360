@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard de Retenção da VSL | Método G90</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/x-icon" href="img/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="img/favicon.ico">
+  <link rel="apple-touch-icon" sizes="180x180" href="img/favicon-180.png">
+  <link rel="stylesheet" href="css/styles.css">
+  <style>
+    body {
+      background-color: #0A0F1D;
+      color: #F8FAFC;
+      padding: 2rem 1rem;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+    .dash-container {
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+    .dash-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .dash-title {
+      font-size: 1.75rem;
+      font-weight: 800;
+      color: #FFFFFF;
+    }
+    .dash-badge {
+      background: rgba(217, 119, 6, 0.15);
+      border: 1px solid rgba(217, 119, 6, 0.3);
+      color: #F59E0B;
+      padding: 0.4rem 1rem;
+      border-radius: 9999px;
+      font-weight: 700;
+      font-size: 0.8125rem;
+    }
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.25rem;
+      margin-bottom: 2.5rem;
+    }
+    .metric-card {
+      background: #131B2E;
+      border: 1px solid #1E293B;
+      border-radius: 16px;
+      padding: 1.5rem;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+    }
+    .metric-value {
+      font-size: 2rem;
+      font-weight: 800;
+      color: #F59E0B;
+      margin-top: 0.5rem;
+    }
+    .metric-label {
+      font-size: 0.875rem;
+      color: #94A3B8;
+      font-weight: 600;
+    }
+    .retention-card {
+      background: #131B2E;
+      border: 1px solid #1E293B;
+      border-radius: 20px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+    }
+    .retention-title {
+      font-size: 1.25rem;
+      font-weight: 800;
+      margin-bottom: 1.5rem;
+      color: #FFFFFF;
+    }
+    .funnel-step {
+      margin-bottom: 1.25rem;
+    }
+    .funnel-meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.9375rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+    .funnel-bar-bg {
+      width: 100%;
+      height: 14px;
+      background: #0B132B;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid #1E293B;
+    }
+    .funnel-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #D97706 0%, #F59E0B 100%);
+      border-radius: 8px;
+      transition: width 0.6s ease;
+    }
+    .pitch-highlight .funnel-bar-fill {
+      background: linear-gradient(90deg, #10B981 0%, #34D399 100%);
+    }
+    .dash-actions {
+      display: flex;
+      gap: 1rem;
+      justify-content: flex-end;
+    }
+    .btn-dash {
+      background: #1E293B;
+      border: 1px solid #334155;
+      color: #FFFFFF;
+      padding: 0.75rem 1.5rem;
+      border-radius: 10px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .btn-dash:hover {
+      background: #334155;
+    }
+  </style>
+</head>
+<body>
+  <div class="dash-container">
+    
+    <div class="dash-header">
+      <div>
+        <h1 class="dash-title">Painel de Retenção da VSL</h1>
+        <p style="color: #94A3B8; margin-top: 0.25rem;">Análise em tempo real da taxa de reprodução e retenção de público (Estilo VTurb)</p>
+      </div>
+      <span class="dash-badge">Método G90 Analytics</span>
+    </div>
+
+    <!-- Cards de Métricas Principais -->
+    <div class="metrics-grid">
+      <div class="metric-card">
+        <div class="metric-label">Impressões da Página</div>
+        <div class="metric-value" id="val-impressions">0</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Reproduções (Plays)</div>
+        <div class="metric-value" id="val-plays">0</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Taxa de Play (Play Rate)</div>
+        <div class="metric-value" id="val-playrate">0%</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">Retenção até o Pitch (3m 05s)</div>
+        <div class="metric-value" style="color: #10B981;" id="val-pitchrate">0%</div>
+      </div>
+    </div>
+
+    <!-- Gráfico de Funil de Retenção -->
+    <div class="retention-card">
+      <h2 class="retention-title">Funil de Retenção do Público</h2>
+      
+      <div class="funnel-step">
+        <div class="funnel-meta">
+          <span>1. Início da Reprodução (Play Rate)</span>
+          <span id="label-plays">0 (0%)</span>
+        </div>
+        <div class="funnel-bar-bg">
+          <div class="funnel-bar-fill" id="bar-plays" style="width: 0%;"></div>
+        </div>
+      </div>
+
+      <div class="funnel-step">
+        <div class="funnel-meta">
+          <span>2. Chegaram a 25% do Vídeo</span>
+          <span id="label-p25">0 (0%)</span>
+        </div>
+        <div class="funnel-bar-bg">
+          <div class="funnel-bar-fill" id="bar-p25" style="width: 0%;"></div>
+        </div>
+      </div>
+
+      <div class="funnel-step">
+        <div class="funnel-meta">
+          <span>3. Chegaram a 50% (Metade)</span>
+          <span id="label-p50">0 (0%)</span>
+        </div>
+        <div class="funnel-bar-bg">
+          <div class="funnel-bar-fill" id="bar-p50" style="width: 0%;"></div>
+        </div>
+      </div>
+
+      <div class="funnel-step">
+        <div class="funnel-meta">
+          <span>4. Chegaram a 75%</span>
+          <span id="label-p75">0 (0%)</span>
+        </div>
+        <div class="funnel-bar-bg">
+          <div class="funnel-bar-fill" id="bar-p75" style="width: 0%;"></div>
+        </div>
+      </div>
+
+      <div class="funnel-step pitch-highlight">
+        <div class="funnel-meta" style="color: #10B981;">
+          <span>5. Chegaram ao Pitch / Botão CTA (3 min 05 seg) ★</span>
+          <span id="label-pitch">0 (0%)</span>
+        </div>
+        <div class="funnel-bar-bg">
+          <div class="funnel-bar-fill" id="bar-pitch" style="width: 0%;"></div>
+        </div>
+      </div>
+
+      <div class="funnel-step">
+        <div class="funnel-meta">
+          <span>6. Assistiram 100% (Final)</span>
+          <span id="label-p100">0 (0%)</span>
+        </div>
+        <div class="funnel-bar-bg">
+          <div class="funnel-bar-fill" id="bar-p100" style="width: 0%;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Controles -->
+    <div class="dash-actions">
+      <button class="btn-dash" onclick="simulateTestData()">Adicionar Dados de Teste</button>
+      <button class="btn-dash" onclick="resetStats()">Zerar Métricas</button>
+      <a href="index.html" class="btn-dash" style="text-decoration: none;">Voltar para a Página</a>
+    </div>
+
+  </div>
+
+  <script>
+    const STORAGE_KEY = 'g90_vsl_analytics';
+
+    function loadStats() {
+      try {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        if (stored) return JSON.parse(stored);
+      } catch(e){}
+      return { impressions: 0, plays: 0, p25: 0, p50: 0, p75: 0, pitch: 0, p100: 0 };
+    }
+
+    function renderDashboard() {
+      const stats = loadStats();
+      const impressions = stats.impressions || 0;
+      const plays = stats.plays || 0;
+      const p25 = stats.p25 || 0;
+      const p50 = stats.p50 || 0;
+      const p75 = stats.p75 || 0;
+      const pitch = stats.pitch || 0;
+      const p100 = stats.p100 || 0;
+
+      const playRate = impressions > 0 ? ((plays / impressions) * 100).toFixed(1) : 0;
+      const pitchRate = plays > 0 ? ((pitch / plays) * 100).toFixed(1) : 0;
+
+      document.getElementById('val-impressions').textContent = impressions;
+      document.getElementById('val-plays').textContent = plays;
+      document.getElementById('val-playrate').textContent = playRate + '%';
+      document.getElementById('val-pitchrate').textContent = pitchRate + '%';
+
+      function calcPercent(val) {
+        return plays > 0 ? ((val / plays) * 100).toFixed(1) : 0;
+      }
+
+      document.getElementById('label-plays').textContent = `${plays} (${playRate}% das impressões)`;
+      document.getElementById('bar-plays').style.width = Math.min(playRate, 100) + '%';
+
+      document.getElementById('label-p25').textContent = `${p25} (${calcPercent(p25)}%)`;
+      document.getElementById('bar-p25').style.width = calcPercent(p25) + '%';
+
+      document.getElementById('label-p50').textContent = `${p50} (${calcPercent(p50)}%)`;
+      document.getElementById('bar-p50').style.width = calcPercent(p50) + '%';
+
+      document.getElementById('label-p75').textContent = `${p75} (${calcPercent(p75)}%)`;
+      document.getElementById('bar-p75').style.width = calcPercent(p75) + '%';
+
+      document.getElementById('label-pitch').textContent = `${pitch} (${calcPercent(pitch)}%)`;
+      document.getElementById('bar-pitch').style.width = calcPercent(pitch) + '%';
+
+      document.getElementById('label-p100').textContent = `${p100} (${calcPercent(p100)}%)`;
+      document.getElementById('bar-p100').style.width = calcPercent(p100) + '%';
+    }
+
+    function simulateTestData() {
+      const current = loadStats();
+      current.impressions += 10;
+      current.plays += 8;
+      current.p25 += 7;
+      current.p50 += 6;
+      current.p75 += 5;
+      current.pitch += 4;
+      current.p100 += 3;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(current));
+      renderDashboard();
+    }
+
+    function resetStats() {
+      if (confirm('Deseja zerar todas as estatísticas de teste da VSL?')) {
+        localStorage.removeItem(STORAGE_KEY);
+        renderDashboard();
+      }
+    }
+
+    renderDashboard();
+  </script>
+</body>
+</html>

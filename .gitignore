@@ -1,0 +1,13 @@
+# OS generated files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Environment and sensitive keys
+.env
+.env.local
+*.log
+
+# Temp files
+scratch/
+tmp/
