@@ -8,6 +8,9 @@ desktop.ini
 .env.local
 *.log
 
+# AG Kit AI agent files
+.agents/
+
 # Temp files
 scratch/
 tmp/
