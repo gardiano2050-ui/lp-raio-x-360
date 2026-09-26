@@ -11,6 +11,7 @@
   <link rel="icon" type="image/png" sizes="32x32" href="img/favicon.ico">
   <link rel="apple-touch-icon" sizes="180x180" href="img/favicon-180.png">
   <link rel="stylesheet" href="css/styles.css">
+  <script src="js/config.js"></script>
   <style>
     body {
       background-color: #0A0F1D;
@@ -112,6 +113,7 @@
       display: flex;
       gap: 1rem;
       justify-content: flex-end;
+      flex-wrap: wrap;
     }
     .btn-dash {
       background: #1E293B;
@@ -125,10 +127,88 @@
     .btn-dash:hover {
       background: #334155;
     }
+
+    /* Password Protection Modal */
+    .auth-overlay {
+      position: fixed;
+      inset: 0;
+      background-color: rgba(5, 8, 15, 0.96);
+      backdrop-filter: blur(12px);
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+    .auth-card {
+      background: #131B2E;
+      border: 1px solid #1E293B;
+      border-radius: 20px;
+      padding: 2.5rem 2rem;
+      max-width: 440px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 25px 50px rgba(0,0,0,0.8);
+    }
+    .auth-title {
+      font-size: 1.5rem;
+      font-weight: 800;
+      margin-bottom: 0.5rem;
+      color: #FFFFFF;
+    }
+    .auth-sub {
+      font-size: 0.875rem;
+      color: #94A3B8;
+      margin-bottom: 1.5rem;
+      line-height: 1.4;
+    }
+    .auth-input {
+      width: 100%;
+      background: #0B132B;
+      border: 1px solid #1E293B;
+      border-radius: 10px;
+      padding: 0.875rem 1rem;
+      color: #FFFFFF;
+      font-size: 1rem;
+      outline: none;
+      text-align: center;
+      letter-spacing: 0.1em;
+      margin-bottom: 0.5rem;
+    }
+    .auth-input:focus {
+      border-color: #D97706;
+      box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.3);
+    }
+    .auth-error {
+      color: #EF4444;
+      font-size: 0.8125rem;
+      display: none;
+      margin-top: 0.5rem;
+      font-weight: 600;
+    }
+    .hidden {
+      display: none !important;
+    }
   </style>
 </head>
 <body>
-  <div class="dash-container">
+
+  <!-- Modal de Autenticação / Senha -->
+  <div id="admin-auth-overlay" class="auth-overlay">
+    <div class="auth-card">
+      <h2 class="auth-title">🔒 Acesso Restrito</h2>
+      <p class="auth-sub">Digite a senha de administrador para acessar os relatórios e métricas da VSL.</p>
+      
+      <form id="auth-form" onsubmit="handleAuthSubmit(event)">
+        <input type="password" id="admin-pass-input" class="auth-input" placeholder="Digite a senha" required autofocus>
+        <div id="auth-error" class="auth-error">Senha incorreta. Tente novamente.</div>
+        <button type="submit" class="btn-primary" style="width: 100%; margin-top: 1rem;">ACESSAR PAINEL</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Conteúdo do Dashboard -->
+  <div id="dash-content" class="dash-container hidden">
     
     <div class="dash-header">
       <div>
@@ -228,12 +308,55 @@
       <button class="btn-dash" onclick="simulateTestData()">Adicionar Dados de Teste</button>
       <button class="btn-dash" onclick="resetStats()">Zerar Métricas</button>
       <a href="index.html" class="btn-dash" style="text-decoration: none;">Voltar para a Página</a>
+      <button class="btn-dash" style="background: #7F1D1D; border-color: #991B1B;" onclick="handleLogout()">Sair (Logout)</button>
     </div>
 
   </div>
 
   <script>
     const STORAGE_KEY = 'g90_vsl_analytics';
+    const SESSION_KEY = 'g90_admin_session';
+
+    function checkAuth() {
+      const isAuth = sessionStorage.getItem(SESSION_KEY) === 'true';
+      const overlay = document.getElementById('admin-auth-overlay');
+      const content = document.getElementById('dash-content');
+
+      if (isAuth) {
+        if (overlay) overlay.classList.add('hidden');
+        if (content) content.classList.remove('hidden');
+        renderDashboard();
+      } else {
+        if (overlay) overlay.classList.remove('hidden');
+        if (content) content.classList.add('hidden');
+      }
+    }
+
+    function handleAuthSubmit(e) {
+      e.preventDefault();
+      const input = document.getElementById('admin-pass-input');
+      const errorMsg = document.getElementById('auth-error');
+      const pass = (input ? input.value : '').trim();
+
+      const expectedPass = (window.G90_CONFIG && window.G90_CONFIG.ADMIN_PASSWORD) ? window.G90_CONFIG.ADMIN_PASSWORD : 'g90admin2026';
+
+      if (pass === expectedPass) {
+        sessionStorage.setItem(SESSION_KEY, 'true');
+        if (errorMsg) errorMsg.style.display = 'none';
+        checkAuth();
+      } else {
+        if (errorMsg) errorMsg.style.display = 'block';
+        if (input) {
+          input.value = '';
+          input.focus();
+        }
+      }
+    }
+
+    function handleLogout() {
+      sessionStorage.removeItem(SESSION_KEY);
+      checkAuth();
+    }
 
     function loadStats() {
       try {
@@ -304,7 +427,7 @@
       }
     }
 
-    renderDashboard();
+    checkAuth();
   </script>
 </body>
 </html>

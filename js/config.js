@@ -10,6 +10,9 @@ window.G90_CONFIG = {
   // VSL Video URL (Local MP4 or Cloudflare R2 / Cloudflare Stream HLS URL)
   VSL_VIDEO_URL: "video/vsl.mp4",
 
+  // Admin Dashboard Security Configuration
+  ADMIN_PASSWORD: "g90admin2026",
+
   // Webhook Integration Settings (Supabase Lead Receiver)
   WEBHOOK_URL: "https://gfggcoororfktycvphpx.supabase.co/functions/v1/receive-lead-gardiano",
   WEBHOOK_SECRET: "Kb9sxIucsrXV4SBi4X7moHx8v81t5cFHT9SDDvT2VI9",
