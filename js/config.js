@@ -19,7 +19,7 @@ window.G90_CONFIG = {
 
   // WhatsApp Redirect Configuration
   // Insert official WhatsApp number here (country code + area code + phone number)
-  WHATSAPP_NUMBER: "5511999999999", 
+  WHATSAPP_NUMBER: "5511971445159", 
   
   // Default pre-filled message sent to Rogério Gardiano
   WHATSAPP_MESSAGE_TEMPLATE: "Olá, Rogério! Acabei de solicitar meu Raio-X 360º G90 e quero entender se o diagnóstico faz sentido para minha empresa.",

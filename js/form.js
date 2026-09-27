@@ -1,6 +1,6 @@
 /**
  * Método G90 — Multi-Step Form & Modal Handler
- * Manages 3-step modal flow, progress indicators, phone input masking, step validation, webhook dispatch, and WhatsApp redirection.
+ * Manages 3-step modal flow, progress indicators, phone input masking, step validation, webhook dispatch, and instant WhatsApp redirection.
  */
 
 window.G90_FORM = (function() {
@@ -44,6 +44,14 @@ window.G90_FORM = (function() {
         stepEl.style.setProperty('display', 'none', 'important');
       }
     });
+
+    // Ensure Step 3 submit button is enabled & ready
+    if (currentStep === 3) {
+      const submitBtn = form.querySelector('button[type="submit"]');
+      if (submitBtn) {
+        submitBtn.disabled = false;
+      }
+    }
 
     // Update progress bar fill width
     const progressFill = document.getElementById('step-progress-fill');
@@ -233,8 +241,8 @@ window.G90_FORM = (function() {
     return isValid;
   }
 
-  // Handle final form submission
-  async function handleSubmit(e) {
+  // Handle final form submission with instant zero-delay WhatsApp redirection
+  function handleSubmit(e) {
     e.preventDefault();
     if (isSubmitting) return;
 
@@ -245,18 +253,6 @@ window.G90_FORM = (function() {
     }
 
     isSubmitting = true;
-    const submitBtn = form.querySelector('button[type="submit"]');
-    const originalBtnText = submitBtn.innerHTML;
-
-    // Set loading state
-    submitBtn.disabled = true;
-    submitBtn.classList.add('btn-loading');
-    submitBtn.innerHTML = `
-      <svg class="spinner" viewBox="0 0 50 50">
-        <circle class="path" cx="25" cy="25" r="20" fill="none" stroke-width="5"></circle>
-      </svg>
-      <span>Enviando...</span>
-    `;
 
     // Collect lead data across all steps
     const formData = new FormData(form);
@@ -292,7 +288,7 @@ window.G90_FORM = (function() {
       window.G90_TRACKING.trackEvent('form_submit', payload);
     }
 
-    // Send lead to Webhook Endpoint
+    // Send lead to Webhook Endpoint with keepalive (runs asynchronously in background)
     try {
       const webhookBase = window.G90_CONFIG.WEBHOOK_URL || window.G90_CONFIG.CRM_ENDPOINT;
       const secret = window.G90_CONFIG.WEBHOOK_SECRET;
@@ -300,48 +296,35 @@ window.G90_FORM = (function() {
       if (webhookBase) {
         const webhookUrl = `${webhookBase}?secret=${encodeURIComponent(secret)}`;
         
-        await fetch(webhookUrl, {
+        fetch(webhookUrl, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             'x-webhook-secret': secret
           },
-          body: JSON.stringify(payload)
-        }).then(res => {
-          console.log('[G90 Webhook] Response Status:', res.status);
-          return res;
+          body: JSON.stringify(payload),
+          keepalive: true
         }).catch(err => console.warn('[G90 Webhook] Call failed:', err));
       }
 
       if (window.G90_TRACKING) {
         window.G90_TRACKING.trackEvent('crm_success');
       }
-
-      // Success feedback
-      submitBtn.classList.remove('btn-loading');
-      submitBtn.classList.add('btn-success');
-      submitBtn.innerHTML = `<span>Solicitação Enviada! Redirecionando...</span>`;
-
-      // Redirect to WhatsApp
-      const waNumber = window.G90_CONFIG.WHATSAPP_NUMBER.replace(/\D/g, '');
-      const waMessage = encodeURIComponent(window.G90_CONFIG.WHATSAPP_MESSAGE_TEMPLATE);
-      const waUrl = `https://wa.me/${waNumber}?text=${waMessage}`;
-
-      if (window.G90_TRACKING) {
-        window.G90_TRACKING.trackEvent('whatsapp_redirect', { whatsapp_url: waUrl });
-      }
-
-      setTimeout(() => {
-        window.location.href = waUrl;
-      }, 1200);
-
     } catch (error) {
       console.error('[G90 Form] Submit Error:', error);
-      submitBtn.disabled = false;
-      isSubmitting = false;
-      submitBtn.classList.remove('btn-loading');
-      submitBtn.innerHTML = originalBtnText;
     }
+
+    // Build WhatsApp URL for new number: 5511971445159
+    const waNumber = (window.G90_CONFIG.WHATSAPP_NUMBER || '5511971445159').replace(/\D/g, '');
+    const waMessage = encodeURIComponent(window.G90_CONFIG.WHATSAPP_MESSAGE_TEMPLATE);
+    const waUrl = `https://wa.me/${waNumber}?text=${waMessage}`;
+
+    if (window.G90_TRACKING) {
+      window.G90_TRACKING.trackEvent('whatsapp_redirect', { whatsapp_url: waUrl });
+    }
+
+    // Instant Zero-Delay Redirection ("bum!")
+    window.location.href = waUrl;
   }
 
   return {
