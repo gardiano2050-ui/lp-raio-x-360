@@ -39,10 +39,14 @@
   <meta name="twitter:description" content="Transforme faturamento em lucro e previsibilidade com o Método G90 por Rogério Gardiano.">
   <meta name="twitter:image" content="https://metodog90.com.br/img/rogerio-01.jpg">
 
-  <!-- Google Fonts (Plus Jakarta Sans) -->
+  <!-- Non-render-blocking Google Fonts (Plus Jakarta Sans) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" media="print" onload="this.media='all'">
+  <noscript>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap">
+  </noscript>
 
   <!-- Favicon -->
   <link rel="icon" type="image/x-icon" href="img/favicon.ico">
@@ -65,8 +69,9 @@
   }
   </script>
 
-  <!-- Custom Design System CSS -->
-  <link rel="stylesheet" href="css/styles.css">
+  <!-- Optimized Minified Design System CSS -->
+  <link rel="preload" as="style" href="css/styles.min.css">
+  <link rel="stylesheet" href="css/styles.min.css">
 </head>
 <body>
   <!-- Google Tag Manager (noscript) -->
@@ -78,7 +83,7 @@
   <header class="brand-header">
     <div class="container">
       <a href="./" class="brand-logo-link" aria-label="Método G90">
-        <img src="img/logo-g90.webp" alt="Método G90 - Rogério Gardiano" class="brand-logo-img">
+        <img src="img/logo-g90.webp" alt="Método G90 - Rogério Gardiano" class="brand-logo-img" width="150" height="84" fetchpriority="high">
       </a>
     </div>
   </header>
@@ -153,7 +158,15 @@
           <!-- Foto de Rogério Gardiano -->
           <div class="authority-media">
             <div class="authority-image-wrapper">
-              <img src="img/rogerio-01.webp" alt="Rogério Gardiano - Criador do Método G90" class="authority-image" loading="lazy" width="380" height="475">
+              <img src="img/rogerio-01-450.webp" 
+                   srcset="img/rogerio-01-450.webp 450w, img/rogerio-01.webp 600w" 
+                   sizes="(max-width: 600px) 380px, 450px" 
+                   alt="Rogério Gardiano - Criador do Método G90" 
+                   class="authority-image" 
+                   loading="lazy" 
+                   decoding="async" 
+                   width="450" 
+                   height="450">
               <div class="authority-image-badge">
                 <span class="badge-title">Rogério Gardiano</span>
                 <span class="badge-sub">Criador do Método G90</span>
@@ -366,11 +379,11 @@
     </div>
   </div>
 
-  <!-- Scripts JavaScript Modulares -->
-  <script src="js/config.js"></script>
-  <script src="js/tracking.js"></script>
-  <script src="js/vsl.js"></script>
-  <script src="js/form.js"></script>
-  <script src="js/main.js"></script>
+  <!-- Scripts JavaScript Modulares com Defer -->
+  <script src="js/config.js" defer></script>
+  <script src="js/tracking.js" defer></script>
+  <script src="js/vsl.js" defer></script>
+  <script src="js/form.js" defer></script>
+  <script src="js/main.js" defer></script>
 </body>
 </html>
