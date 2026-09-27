@@ -24,6 +24,43 @@ window.G90_FORM = (function() {
     });
   }
 
+  // Real-time button state updater for active step
+  function updateStepButtonState() {
+    const form = document.getElementById('raiox-form');
+    if (!form || isSubmitting) return;
+
+    const activeStepEl = form.querySelector(`.form-step[data-step="${currentStep}"]`);
+    if (!activeStepEl) return;
+
+    const nextBtn = activeStepEl.querySelector('.js-next-step');
+    const submitBtn = activeStepEl.querySelector('button[type="submit"]');
+
+    const requiredInputs = activeStepEl.querySelectorAll('[required]');
+    let stepValid = true;
+
+    requiredInputs.forEach(input => {
+      const val = (input.value || '').trim();
+      if (!val) stepValid = false;
+
+      if (input.type === 'tel' || input.id === 'whatsapp') {
+        const rawDigits = val.replace(/\D/g, '');
+        if (rawDigits.length < 10) stepValid = false;
+      }
+
+      if (input.type === 'email' || input.id === 'email') {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(val)) stepValid = false;
+      }
+    });
+
+    if (nextBtn) {
+      nextBtn.disabled = !stepValid;
+    }
+    if (submitBtn) {
+      submitBtn.disabled = !stepValid;
+    }
+  }
+
   // Multi-step navigation function
   function goToStep(targetStep) {
     if (targetStep < 1 || targetStep > 3) return;
@@ -45,14 +82,6 @@ window.G90_FORM = (function() {
       }
     });
 
-    // Ensure Step 3 submit button is enabled & ready
-    if (currentStep === 3) {
-      const submitBtn = form.querySelector('button[type="submit"]');
-      if (submitBtn) {
-        submitBtn.disabled = false;
-      }
-    }
-
     // Update progress bar fill width
     const progressFill = document.getElementById('step-progress-fill');
     if (progressFill) {
@@ -72,6 +101,9 @@ window.G90_FORM = (function() {
         badge.classList.add('step-badge-completed');
       }
     }
+
+    // Update active step button state (disables submit button on Step 3 until textarea is filled)
+    updateStepButtonState();
 
     // Focus first input in active step panel
     const activeStepEl = form.querySelector(`.form-step[data-step="${currentStep}"]`);
@@ -214,18 +246,27 @@ window.G90_FORM = (function() {
       }
     });
 
-    // Handle Enter key on inputs in Step 1 & 2 to advance
-    const inputs = form.querySelectorAll('input, select');
-    inputs.forEach(input => {
+    // Real-time validation listeners for all inputs, selects, and textareas
+    const allInputs = form.querySelectorAll('input, select, textarea');
+    allInputs.forEach(input => {
+      ['input', 'change', 'keyup', 'blur'].forEach(evtType => {
+        input.addEventListener(evtType, function() {
+          updateStepButtonState();
+        });
+      });
+
       input.addEventListener('keydown', function(e) {
-        if (e.key === 'Enter') {
+        if (e.key === 'Enter' && currentStep < 3 && input.tagName !== 'TEXTAREA') {
           e.preventDefault();
-          if (currentStep < 3 && validateStepFields(currentStep)) {
+          if (validateStepFields(currentStep)) {
             goToStep(currentStep + 1);
           }
         }
       });
     });
+
+    // Initial button state check
+    updateStepButtonState();
   }
 
   // Explicit validation on final form submit
@@ -314,7 +355,7 @@ window.G90_FORM = (function() {
       console.error('[G90 Form] Submit Error:', error);
     }
 
-    // Build WhatsApp URL for new number: 5511971445159
+    // Build WhatsApp URL for number: 5511971445159
     const waNumber = (window.G90_CONFIG.WHATSAPP_NUMBER || '5511971445159').replace(/\D/g, '');
     const waMessage = encodeURIComponent(window.G90_CONFIG.WHATSAPP_MESSAGE_TEMPLATE);
     const waUrl = `https://wa.me/${waNumber}?text=${waMessage}`;
