@@ -324,7 +324,11 @@ window.G90_FORM = (function() {
       origem_url: window.location.href,
       pagina_origem: document.referrer || window.location.origin,
       dispositivo: device,
-      ...utms
+      utm_source: utms.utm_source || '',
+      utm_medium: utms.utm_medium || '',
+      utm_campaign: utms.utm_campaign || '',
+      utm_content: utms.utm_content || '',
+      utm_term: utms.utm_term || ''
     };
 
     if (window.G90_TRACKING) {

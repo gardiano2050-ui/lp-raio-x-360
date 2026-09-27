@@ -704,37 +704,48 @@ body {
 }
 
 .step-indicators {
-  display: flex;
+  display: flex !important;
+  align-items: center;
   justify-content: space-between;
   gap: 0.5rem;
 }
 
 .step-badge {
+  flex: 1;
+  text-align: center;
+  padding: 0.35rem 0.5rem;
+  background: var(--color-bg-input);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
   font-size: 0.75rem;
   font-weight: 700;
   color: var(--color-text-muted);
-  opacity: 0.5;
+  opacity: 0.6;
   transition: all var(--transition-fast);
   white-space: nowrap;
 }
 
 .step-badge-active {
-  color: var(--color-accent-light);
-  opacity: 1;
+  color: #FFFFFF !important;
+  background: var(--color-bg-card) !important;
+  border-color: var(--color-accent) !important;
+  opacity: 1 !important;
+  box-shadow: 0 0 10px rgba(217, 119, 6, 0.25);
 }
 
 .step-badge-completed {
-  color: var(--color-success);
-  opacity: 0.85;
+  color: var(--color-success) !important;
+  border-color: rgba(16, 185, 129, 0.4) !important;
+  opacity: 0.9 !important;
 }
 
 /* Multi-Step Panels */
 .form-step {
-  display: none;
+  display: none !important;
 }
 
 .form-step-active {
-  display: block;
+  display: block !important;
   animation: stepFadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 

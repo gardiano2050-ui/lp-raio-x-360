@@ -57,7 +57,7 @@ window.G90_TRACKING = (function() {
     getDeviceType: getDeviceType,
     trackEvent: trackEvent,
     init: function() {
-      trackEvent('page_view');
+      // page_view event removed as requested (handled directly via GTM)
     }
   };
 })();
