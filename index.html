@@ -275,104 +275,145 @@
         <p class="modal-subtitle">Conte um pouco sobre sua empresa para entendermos seu momento antes da conversa com Rogério.</p>
       </div>
 
+      <!-- Step Progress Indicator -->
+      <div class="step-progress-wrapper">
+        <div class="step-progress-bar">
+          <div class="step-progress-fill" id="step-progress-fill" style="width: 33.33%;"></div>
+        </div>
+        <div class="step-indicators">
+          <span class="step-badge step-badge-active" id="step-badge-1">1. Contato</span>
+          <span class="step-badge" id="step-badge-2">2. Empresa</span>
+          <span class="step-badge" id="step-badge-3">3. Diagnóstico</span>
+        </div>
+      </div>
+
       <form id="raiox-form" novalidate>
         
-        <!-- Campo 1: Nome -->
-        <div class="form-group">
-          <label class="form-label" for="nome">Nome *</label>
-          <input class="form-input" type="text" id="nome" name="nome" placeholder="Digite seu nome" required>
-          <span class="input-error-msg">Por favor, informe seu nome completo.</span>
+        <!-- ETAPA 1: Identificação -->
+        <div class="form-step form-step-active" data-step="1">
+          <!-- Campo 1: Nome -->
+          <div class="form-group">
+            <label class="form-label" for="nome">Nome *</label>
+            <input class="form-input" type="text" id="nome" name="nome" placeholder="Digite seu nome" required>
+            <span class="input-error-msg">Por favor, informe seu nome completo.</span>
+          </div>
+
+          <!-- Campo 2: WhatsApp -->
+          <div class="form-group">
+            <label class="form-label" for="whatsapp">WhatsApp *</label>
+            <input class="form-input" type="tel" id="whatsapp" name="whatsapp" placeholder="(00) 00000-0000" required>
+            <span class="input-error-msg">Informe um número de WhatsApp válido.</span>
+          </div>
+
+          <!-- Campo 3: E-mail -->
+          <div class="form-group">
+            <label class="form-label" for="email">E-mail *</label>
+            <input class="form-input" type="email" id="email" name="email" placeholder="seuemail@empresa.com.br" required>
+            <span class="input-error-msg">Informe um e-mail válido.</span>
+          </div>
+
+          <!-- Campo 4: Nome da empresa -->
+          <div class="form-group">
+            <label class="form-label" for="empresa">Nome da empresa *</label>
+            <input class="form-input" type="text" id="empresa" name="empresa" placeholder="Nome da empresa" required>
+            <span class="input-error-msg">Por favor, informe o nome da sua empresa.</span>
+          </div>
+
+          <!-- Botão Avançar Passo 1 -->
+          <button class="btn-primary js-next-step" type="button" data-next="2" style="width: 100%; margin-top: 0.5rem;">
+            PRÓXIMO PASSO &rarr;
+          </button>
         </div>
 
-        <!-- Campo 2: WhatsApp -->
-        <div class="form-group">
-          <label class="form-label" for="whatsapp">WhatsApp *</label>
-          <input class="form-input" type="tel" id="whatsapp" name="whatsapp" placeholder="(00) 00000-0000" required>
-          <span class="input-error-msg">Informe um número de WhatsApp válido.</span>
+        <!-- ETAPA 2: Dados da Empresa -->
+        <div class="form-step" data-step="2">
+          <!-- Campo 5: Segmento da empresa -->
+          <div class="form-group">
+            <label class="form-label" for="segmento">Segmento da empresa *</label>
+            <select class="form-select" id="segmento" name="segmento" required>
+              <option value="" disabled selected>Selecione o segmento</option>
+              <option value="Indústria">Indústria</option>
+              <option value="Distribuidora">Distribuidora</option>
+              <option value="Educação">Educação</option>
+              <option value="Varejo">Varejo</option>
+              <option value="Serviços">Serviços</option>
+              <option value="Outro">Outro</option>
+            </select>
+            <span class="input-error-msg">Selecione o segmento da empresa.</span>
+          </div>
+
+          <!-- Campo 6: Faturamento médio mensal -->
+          <div class="form-group">
+            <label class="form-label" for="faturamento">Faturamento médio mensal *</label>
+            <select class="form-select" id="faturamento" name="faturamento" required>
+              <option value="" disabled selected>Selecione a faixa de faturamento</option>
+              <option value="Até R$ 500 mil">Até R$ 500 mil</option>
+              <option value="R$ 500 mil a R$ 1 milhão">R$ 500 mil a R$ 1 milhão</option>
+              <option value="R$ 1 milhão a R$ 5 milhões">R$ 1 milhão a R$ 5 milhões</option>
+              <option value="Acima de R$ 5 milhões">Acima de R$ 5 milhões</option>
+            </select>
+            <span class="input-error-msg">Selecione a faixa de faturamento médio.</span>
+          </div>
+
+          <!-- Campo 7: Número de funcionários -->
+          <div class="form-group">
+            <label class="form-label" for="funcionarios">Número de funcionários</label>
+            <select class="form-select" id="funcionarios" name="funcionarios">
+              <option value="" disabled selected>Selecione a quantidade</option>
+              <option value="1 a 5">1 a 5 funcionários</option>
+              <option value="6 a 20">6 a 20 funcionários</option>
+              <option value="21 a 50">21 a 50 funcionários</option>
+              <option value="51 a 100">51 a 100 funcionários</option>
+              <option value="Mais de 100">Mais de 100 funcionários</option>
+            </select>
+          </div>
+
+          <!-- Campo 8: Principal desafio -->
+          <div class="form-group">
+            <label class="form-label" for="desafio">Qual é hoje o principal desafio da sua empresa? *</label>
+            <select class="form-select" id="desafio" name="desafio" required>
+              <option value="" disabled selected>Selecione o principal desafio</option>
+              <option value="Aumentar margem/lucro">Aumentar margem/lucro</option>
+              <option value="Precificação">Precificação</option>
+              <option value="Vendas/comercial">Vendas/comercial</option>
+              <option value="Processos">Processos</option>
+              <option value="Equipe/pessoas">Equipe/pessoas</option>
+              <option value="Fluxo de caixa">Fluxo de caixa</option>
+              <option value="Indicadores/gestão">Indicadores/gestão</option>
+              <option value="Outro">Outro</option>
+            </select>
+            <span class="input-error-msg">Selecione seu desafio principal.</span>
+          </div>
+
+          <!-- Botões Navegação Passo 2 -->
+          <div class="step-nav-buttons">
+            <button class="btn-secondary js-prev-step" type="button" data-prev="1">
+              &larr; Voltar
+            </button>
+            <button class="btn-primary js-next-step" type="button" data-next="3">
+              PRÓXIMO PASSO &rarr;
+            </button>
+          </div>
         </div>
 
-        <!-- Campo 3: E-mail -->
-        <div class="form-group">
-          <label class="form-label" for="email">E-mail *</label>
-          <input class="form-input" type="email" id="email" name="email" placeholder="seuemail@empresa.com.br" required>
-          <span class="input-error-msg">Informe um e-mail válido.</span>
-        </div>
+        <!-- ETAPA 3: Diagnóstico Final -->
+        <div class="form-step" data-step="3">
+          <!-- Campo 9: O que mais preocupa na gestão -->
+          <div class="form-group">
+            <label class="form-label" for="preocupacao">O que mais preocupa você hoje na gestão da empresa?</label>
+            <textarea class="form-textarea" id="preocupacao" name="preocupacao" placeholder="Conte brevemente o que está acontecendo na sua empresa."></textarea>
+          </div>
 
-        <!-- Campo 3: Nome da empresa -->
-        <div class="form-group">
-          <label class="form-label" for="empresa">Nome da empresa *</label>
-          <input class="form-input" type="text" id="empresa" name="empresa" placeholder="Nome da empresa" required>
-          <span class="input-error-msg">Por favor, informe o nome da sua empresa.</span>
+          <!-- Botões Envio Passo 3 -->
+          <div class="step-nav-buttons">
+            <button class="btn-secondary js-prev-step" type="button" data-prev="2">
+              &larr; Voltar
+            </button>
+            <button class="btn-primary" type="submit">
+              SOLICITAR MEU RAIO-X
+            </button>
+          </div>
         </div>
-
-        <!-- Campo 4: Segmento da empresa -->
-        <div class="form-group">
-          <label class="form-label" for="segmento">Segmento da empresa *</label>
-          <select class="form-select" id="segmento" name="segmento" required>
-            <option value="" disabled selected>Selecione o segmento</option>
-            <option value="Indústria">Indústria</option>
-            <option value="Distribuidora">Distribuidora</option>
-            <option value="Educação">Educação</option>
-            <option value="Varejo">Varejo</option>
-            <option value="Serviços">Serviços</option>
-            <option value="Outro">Outro</option>
-          </select>
-          <span class="input-error-msg">Selecione o segmento da empresa.</span>
-        </div>
-
-        <!-- Campo 5: Faturamento médio mensal -->
-        <div class="form-group">
-          <label class="form-label" for="faturamento">Faturamento médio mensal *</label>
-          <select class="form-select" id="faturamento" name="faturamento" required>
-            <option value="" disabled selected>Selecione a faixa de faturamento</option>
-            <option value="Até R$ 500 mil">Até R$ 500 mil</option>
-            <option value="R$ 500 mil a R$ 1 milhão">R$ 500 mil a R$ 1 milhão</option>
-            <option value="R$ 1 milhão a R$ 5 milhões">R$ 1 milhão a R$ 5 milhões</option>
-            <option value="Acima de R$ 5 milhões">Acima de R$ 5 milhões</option>
-          </select>
-          <span class="input-error-msg">Selecione a faixa de faturamento médio.</span>
-        </div>
-
-        <!-- Campo 6: Número de funcionários -->
-        <div class="form-group">
-          <label class="form-label" for="funcionarios">Número de funcionários</label>
-          <select class="form-select" id="funcionarios" name="funcionarios">
-            <option value="" disabled selected>Selecione a quantidade</option>
-            <option value="1 a 5">1 a 5 funcionários</option>
-            <option value="6 a 20">6 a 20 funcionários</option>
-            <option value="21 a 50">21 a 50 funcionários</option>
-            <option value="51 a 100">51 a 100 funcionários</option>
-            <option value="Mais de 100">Mais de 100 funcionários</option>
-          </select>
-        </div>
-
-        <!-- Campo 7: Principal desafio -->
-        <div class="form-group">
-          <label class="form-label" for="desafio">Qual é hoje o principal desafio da sua empresa? *</label>
-          <select class="form-select" id="desafio" name="desafio" required>
-            <option value="" disabled selected>Selecione o principal desafio</option>
-            <option value="Aumentar margem/lucro">Aumentar margem/lucro</option>
-            <option value="Precificação">Precificação</option>
-            <option value="Vendas/comercial">Vendas/comercial</option>
-            <option value="Processos">Processos</option>
-            <option value="Equipe/pessoas">Equipe/pessoas</option>
-            <option value="Fluxo de caixa">Fluxo de caixa</option>
-            <option value="Indicadores/gestão">Indicadores/gestão</option>
-            <option value="Outro">Outro</option>
-          </select>
-          <span class="input-error-msg">Selecione seu desafio principal.</span>
-        </div>
-
-        <!-- Campo 8: O que mais preocupa na gestão -->
-        <div class="form-group">
-          <label class="form-label" for="preocupacao">O que mais preocupa você hoje na gestão da empresa?</label>
-          <textarea class="form-textarea" id="preocupacao" name="preocupacao" placeholder="Conte brevemente o que está acontecendo na sua empresa."></textarea>
-        </div>
-
-        <!-- Botão do Formulário -->
-        <button class="btn-primary" type="submit" style="width: 100%; margin-top: 0.5rem;">
-          SOLICITAR MEU RAIO-X
-        </button>
 
       </form>
     </div>

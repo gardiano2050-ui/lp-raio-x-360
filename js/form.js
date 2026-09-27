@@ -1,10 +1,11 @@
 /**
- * Método G90 — Form & Modal Handler
- * Manages modal display, phone input masking, dynamic button enabling, webhook dispatch, and WhatsApp redirection.
+ * Método G90 — Multi-Step Form & Modal Handler
+ * Manages 3-step modal flow, progress indicators, phone input masking, step validation, webhook dispatch, and WhatsApp redirection.
  */
 
 window.G90_FORM = (function() {
   let isSubmitting = false;
+  let currentStep = 1;
 
   // Phone input mask for Brazilian phone format (00) 00000-0000
   function applyPhoneMask(input) {
@@ -23,7 +24,107 @@ window.G90_FORM = (function() {
     });
   }
 
-  // Open modal popup
+  // Multi-step navigation function
+  function goToStep(targetStep) {
+    if (targetStep < 1 || targetStep > 3) return;
+    currentStep = targetStep;
+
+    const form = document.getElementById('raiox-form');
+    if (!form) return;
+
+    // Show active step panel
+    const steps = form.querySelectorAll('.form-step');
+    steps.forEach(stepEl => {
+      const stepNum = parseInt(stepEl.getAttribute('data-step'), 10);
+      if (stepNum === currentStep) {
+        stepEl.classList.add('form-step-active');
+        stepEl.style.display = 'block';
+      } else {
+        stepEl.classList.remove('form-step-active');
+        stepEl.style.display = 'none';
+      }
+    });
+
+    // Update progress bar fill width
+    const progressFill = document.getElementById('step-progress-fill');
+    if (progressFill) {
+      const percentages = { 1: '33.33%', 2: '66.66%', 3: '100%' };
+      progressFill.style.width = percentages[currentStep] || '33.33%';
+    }
+
+    // Update step badge indicators
+    for (let i = 1; i <= 3; i++) {
+      const badge = document.getElementById(`step-badge-${i}`);
+      if (!badge) continue;
+      badge.classList.remove('step-badge-active', 'step-badge-completed');
+
+      if (i === currentStep) {
+        badge.classList.add('step-badge-active');
+      } else if (i < currentStep) {
+        badge.classList.add('step-badge-completed');
+      }
+    }
+
+    // Focus first input in active step panel
+    const activeStepEl = form.querySelector(`.form-step[data-step="${currentStep}"]`);
+    if (activeStepEl) {
+      const firstInput = activeStepEl.querySelector('input, select, textarea');
+      if (firstInput) firstInput.focus();
+    }
+
+    // Track step view event
+    if (window.G90_TRACKING) {
+      window.G90_TRACKING.trackEvent(`form_step_${currentStep}`);
+    }
+  }
+
+  // Validate specific step fields before advancing
+  function validateStepFields(stepNumber) {
+    const form = document.getElementById('raiox-form');
+    if (!form) return false;
+
+    let isValid = true;
+    const stepEl = form.querySelector(`.form-step[data-step="${stepNumber}"]`);
+    if (!stepEl) return true;
+
+    const requiredInputs = stepEl.querySelectorAll('[required]');
+
+    requiredInputs.forEach(input => {
+      const errorMsgEl = input.parentNode.querySelector('.input-error-msg');
+      const val = (input.value || '').trim();
+
+      if (!val) {
+        isValid = false;
+        input.classList.add('input-error');
+        if (errorMsgEl) errorMsgEl.style.display = 'block';
+      } else {
+        input.classList.remove('input-error');
+        if (errorMsgEl) errorMsgEl.style.display = 'none';
+      }
+
+      if (input.type === 'tel' || input.id === 'whatsapp') {
+        const rawDigits = val.replace(/\D/g, '');
+        if (rawDigits.length < 10) {
+          isValid = false;
+          input.classList.add('input-error');
+          if (errorMsgEl) errorMsgEl.style.display = 'block';
+        }
+      }
+
+      if (input.type === 'email' || input.id === 'email') {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(val)) {
+          isValid = false;
+          input.classList.add('input-error');
+          if (errorMsgEl) errorMsgEl.style.display = 'block';
+        }
+      }
+    });
+
+    return isValid;
+  }
+
+  // Open modal popup & reset to Step 1
   function openModal() {
     const modal = document.getElementById('raiox-modal');
     if (!modal) return;
@@ -31,12 +132,12 @@ window.G90_FORM = (function() {
     modal.setAttribute('aria-hidden', 'false');
     document.body.style.overflow = 'hidden';
 
+    // Reset to Step 1 on open
+    goToStep(1);
+
     if (window.G90_TRACKING) {
       window.G90_TRACKING.trackEvent('form_open');
     }
-
-    const firstInput = modal.querySelector('input, select, textarea');
-    if (firstInput) firstInput.focus();
   }
 
   // Close modal popup
@@ -48,7 +149,7 @@ window.G90_FORM = (function() {
     document.body.style.overflow = '';
   }
 
-  // Setup event listeners for modal & keyboard
+  // Setup event listeners for modal buttons & step controls
   function setupModalListeners() {
     const openBtns = document.querySelectorAll('.js-open-raiox-modal');
     openBtns.forEach(btn => {
@@ -79,109 +180,103 @@ window.G90_FORM = (function() {
     if (modalBackdrop) {
       modalBackdrop.addEventListener('click', closeModal);
     }
+
+    // Step navigation buttons
+    const nextBtns = document.querySelectorAll('.js-next-step');
+    nextBtns.forEach(btn => {
+      btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        const targetStep = parseInt(btn.getAttribute('data-next'), 10);
+        const fromStep = targetStep - 1;
+
+        if (validateStepFields(fromStep)) {
+          goToStep(targetStep);
+        }
+      });
+    });
+
+    const prevBtns = document.querySelectorAll('.js-prev-step');
+    prevBtns.forEach(btn => {
+      btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        const targetStep = parseInt(btn.getAttribute('data-prev'), 10);
+        goToStep(targetStep);
+      });
+    });
   }
 
-  // Check overall form validity for real-time button enabling
-  function checkFormValidity(form) {
-    const requiredInputs = form.querySelectorAll('[required]');
-    let allValid = true;
+  // Real-time button enabling for active step
+  function updateStepButtonState(form) {
+    const activeStepEl = form.querySelector(`.form-step[data-step="${currentStep}"]`);
+    if (!activeStepEl) return;
+
+    const nextBtn = activeStepEl.querySelector('.js-next-step');
+    const submitBtn = activeStepEl.querySelector('button[type="submit"]');
+
+    const requiredInputs = activeStepEl.querySelectorAll('[required]');
+    let stepValid = true;
 
     requiredInputs.forEach(input => {
       const val = (input.value || '').trim();
-      if (!val) {
-        allValid = false;
-      }
+      if (!val) stepValid = false;
 
       if (input.type === 'tel' || input.id === 'whatsapp') {
         const rawDigits = val.replace(/\D/g, '');
-        if (rawDigits.length < 10) {
-          allValid = false;
-        }
+        if (rawDigits.length < 10) stepValid = false;
       }
 
       if (input.type === 'email' || input.id === 'email') {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(val)) {
-          allValid = false;
-        }
+        if (!emailRegex.test(val)) stepValid = false;
       }
     });
 
-    return allValid;
+    if (nextBtn) {
+      nextBtn.disabled = !stepValid;
+    }
+    if (submitBtn && !isSubmitting) {
+      submitBtn.disabled = !stepValid;
+    }
   }
 
-  // Update button disabled state dynamically
-  function updateSubmitButtonState(form) {
-    const submitBtn = form.querySelector('button[type="submit"]');
-    if (!submitBtn || isSubmitting) return;
-
-    const isValid = checkFormValidity(form);
-    submitBtn.disabled = !isValid;
-  }
-
-  // Setup real-time listeners for input changes
+  // Setup real-time listeners for form input changes
   function setupRealtimeValidation(form) {
-    updateSubmitButtonState(form);
+    updateStepButtonState(form);
 
     const inputs = form.querySelectorAll('input, select, textarea');
     inputs.forEach(input => {
-      input.addEventListener('input', function() {
-        updateSubmitButtonState(form);
+      ['input', 'change', 'blur'].forEach(evtType => {
+        input.addEventListener(evtType, function() {
+          updateStepButtonState(form);
+        });
       });
-      input.addEventListener('change', function() {
-        updateSubmitButtonState(form);
-      });
-      input.addEventListener('blur', function() {
-        updateSubmitButtonState(form);
+
+      // Handle Enter key on Step 1 & 2 to advance to next step instead of premature submit
+      input.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && currentStep < 3 && input.tagName !== 'TEXTAREA') {
+          e.preventDefault();
+          if (validateStepFields(currentStep)) {
+            goToStep(currentStep + 1);
+          }
+        }
       });
     });
   }
 
-  // Explicit validation for errors feedback on submit
+  // Explicit validation on final form submit
   function validateFormOnSubmit(form) {
     let isValid = true;
-    const requiredInputs = form.querySelectorAll('[required]');
-
-    requiredInputs.forEach(input => {
-      const errorMsgEl = input.parentNode.querySelector('.input-error-msg');
-      const val = (input.value || '').trim();
-
-      if (!val) {
+    for (let s = 1; s <= 3; s++) {
+      if (!validateStepFields(s)) {
         isValid = false;
-        input.classList.add('input-error');
-        if (errorMsgEl) errorMsgEl.style.display = 'block';
-      } else {
-        input.classList.remove('input-error');
-        if (errorMsgEl) errorMsgEl.style.display = 'none';
-      }
-    });
-
-    const phoneInput = form.querySelector('#whatsapp');
-    if (phoneInput) {
-      const rawDigits = phoneInput.value.replace(/\D/g, '');
-      const phoneErrorMsg = phoneInput.parentNode.querySelector('.input-error-msg');
-      if (rawDigits.length < 10) {
-        isValid = false;
-        phoneInput.classList.add('input-error');
-        if (phoneErrorMsg) phoneErrorMsg.style.display = 'block';
+        goToStep(s);
+        break;
       }
     }
-
-    const emailInput = form.querySelector('#email');
-    if (emailInput) {
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      const emailErrorMsg = emailInput.parentNode.querySelector('.input-error-msg');
-      if (!emailRegex.test(emailInput.value.trim())) {
-        isValid = false;
-        emailInput.classList.add('input-error');
-        if (emailErrorMsg) emailErrorMsg.style.display = 'block';
-      }
-    }
-
     return isValid;
   }
 
-  // Handle form submission
+  // Handle final form submission
   async function handleSubmit(e) {
     e.preventDefault();
     if (isSubmitting) return;
@@ -206,7 +301,7 @@ window.G90_FORM = (function() {
       <span>Enviando...</span>
     `;
 
-    // Collect lead data
+    // Collect lead data across all steps
     const formData = new FormData(form);
     const utms = window.G90_TRACKING ? window.G90_TRACKING.getUTMParams() : {};
     const device = window.G90_TRACKING ? window.G90_TRACKING.getDeviceType() : 'desktop';

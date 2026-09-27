@@ -681,6 +681,113 @@ body {
   line-height: 1.4;
 }
 
+/* Multi-Step Progress Indicator */
+.step-progress-wrapper {
+  margin-bottom: 1.5rem;
+}
+
+.step-progress-bar {
+  width: 100%;
+  height: 6px;
+  background-color: var(--color-bg-input);
+  border-radius: 9999px;
+  overflow: hidden;
+  margin-bottom: 0.75rem;
+  border: 1px solid var(--color-border);
+}
+
+.step-progress-fill {
+  height: 100%;
+  background: var(--color-accent-gradient);
+  border-radius: 9999px;
+  transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.step-indicators {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.step-badge {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--color-text-muted);
+  opacity: 0.5;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+}
+
+.step-badge-active {
+  color: var(--color-accent-light);
+  opacity: 1;
+}
+
+.step-badge-completed {
+  color: var(--color-success);
+  opacity: 0.85;
+}
+
+/* Multi-Step Panels */
+.form-step {
+  display: none;
+}
+
+.form-step-active {
+  display: block;
+  animation: stepFadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes stepFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Step Navigation Buttons */
+.step-nav-buttons {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem 1.25rem;
+  font-family: var(--font-main);
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: var(--color-text-muted);
+  background: var(--color-bg-input);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  text-decoration: none;
+}
+
+.btn-secondary:hover {
+  color: var(--color-text-main);
+  border-color: var(--color-border-focus);
+  background: var(--color-bg-card);
+}
+
+.step-nav-buttons .btn-secondary {
+  flex: 1;
+  max-width: 120px;
+}
+
+.step-nav-buttons .btn-primary {
+  flex: 2;
+}
+
 /* Form Controls */
 .form-group {
   margin-bottom: 1.25rem;
