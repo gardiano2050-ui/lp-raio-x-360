@@ -77,10 +77,6 @@ window.G90_VSL = (function() {
     try {
       localStorage.setItem(STORAGE_CTA_KEY, 'true');
     } catch (e) {}
-
-    if (window.G90_TRACKING) {
-      window.G90_TRACKING.trackEvent('cta_visible');
-    }
   }
 
   function initVSLPlayer() {
