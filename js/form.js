@@ -32,16 +32,16 @@ window.G90_FORM = (function() {
     const form = document.getElementById('raiox-form');
     if (!form) return;
 
-    // Show active step panel
+    // Show active step panel & hide others
     const steps = form.querySelectorAll('.form-step');
     steps.forEach(stepEl => {
       const stepNum = parseInt(stepEl.getAttribute('data-step'), 10);
       if (stepNum === currentStep) {
         stepEl.classList.add('form-step-active');
-        stepEl.style.display = 'block';
+        stepEl.style.setProperty('display', 'block', 'important');
       } else {
         stepEl.classList.remove('form-step-active');
-        stepEl.style.display = 'none';
+        stepEl.style.setProperty('display', 'none', 'important');
       }
     });
 
@@ -180,82 +180,39 @@ window.G90_FORM = (function() {
     if (modalBackdrop) {
       modalBackdrop.addEventListener('click', closeModal);
     }
+  }
 
-    // Step navigation buttons
-    const nextBtns = document.querySelectorAll('.js-next-step');
-    nextBtns.forEach(btn => {
-      btn.addEventListener('click', function(e) {
+  // Setup form step navigation using robust event delegation
+  function setupStepNavigation(form) {
+    form.addEventListener('click', function(e) {
+      const nextBtn = e.target.closest('.js-next-step');
+      if (nextBtn) {
         e.preventDefault();
-        const targetStep = parseInt(btn.getAttribute('data-next'), 10);
+        const targetStep = parseInt(nextBtn.getAttribute('data-next'), 10);
         const fromStep = targetStep - 1;
 
         if (validateStepFields(fromStep)) {
           goToStep(targetStep);
         }
-      });
-    });
+        return;
+      }
 
-    const prevBtns = document.querySelectorAll('.js-prev-step');
-    prevBtns.forEach(btn => {
-      btn.addEventListener('click', function(e) {
+      const prevBtn = e.target.closest('.js-prev-step');
+      if (prevBtn) {
         e.preventDefault();
-        const targetStep = parseInt(btn.getAttribute('data-prev'), 10);
+        const targetStep = parseInt(prevBtn.getAttribute('data-prev'), 10);
         goToStep(targetStep);
-      });
-    });
-  }
-
-  // Real-time button enabling for active step
-  function updateStepButtonState(form) {
-    const activeStepEl = form.querySelector(`.form-step[data-step="${currentStep}"]`);
-    if (!activeStepEl) return;
-
-    const nextBtn = activeStepEl.querySelector('.js-next-step');
-    const submitBtn = activeStepEl.querySelector('button[type="submit"]');
-
-    const requiredInputs = activeStepEl.querySelectorAll('[required]');
-    let stepValid = true;
-
-    requiredInputs.forEach(input => {
-      const val = (input.value || '').trim();
-      if (!val) stepValid = false;
-
-      if (input.type === 'tel' || input.id === 'whatsapp') {
-        const rawDigits = val.replace(/\D/g, '');
-        if (rawDigits.length < 10) stepValid = false;
-      }
-
-      if (input.type === 'email' || input.id === 'email') {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(val)) stepValid = false;
+        return;
       }
     });
 
-    if (nextBtn) {
-      nextBtn.disabled = !stepValid;
-    }
-    if (submitBtn && !isSubmitting) {
-      submitBtn.disabled = !stepValid;
-    }
-  }
-
-  // Setup real-time listeners for form input changes
-  function setupRealtimeValidation(form) {
-    updateStepButtonState(form);
-
-    const inputs = form.querySelectorAll('input, select, textarea');
+    // Handle Enter key on inputs in Step 1 & 2 to advance
+    const inputs = form.querySelectorAll('input, select');
     inputs.forEach(input => {
-      ['input', 'change', 'blur'].forEach(evtType => {
-        input.addEventListener(evtType, function() {
-          updateStepButtonState(form);
-        });
-      });
-
-      // Handle Enter key on Step 1 & 2 to advance to next step instead of premature submit
       input.addEventListener('keydown', function(e) {
-        if (e.key === 'Enter' && currentStep < 3 && input.tagName !== 'TEXTAREA') {
+        if (e.key === 'Enter') {
           e.preventDefault();
-          if (validateStepFields(currentStep)) {
+          if (currentStep < 3 && validateStepFields(currentStep)) {
             goToStep(currentStep + 1);
           }
         }
@@ -398,7 +355,7 @@ window.G90_FORM = (function() {
 
       const form = document.getElementById('raiox-form');
       if (form) {
-        setupRealtimeValidation(form);
+        setupStepNavigation(form);
         form.addEventListener('submit', handleSubmit);
       }
     }

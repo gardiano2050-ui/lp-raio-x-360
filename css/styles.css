@@ -740,11 +740,11 @@ body {
 }
 
 /* Multi-Step Panels */
-.form-step {
+.form-step:not(.form-step-active) {
   display: none !important;
 }
 
-.form-step-active {
+.form-step.form-step-active {
   display: block !important;
   animation: stepFadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
